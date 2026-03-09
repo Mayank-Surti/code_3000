@@ -18,7 +18,15 @@ def link_records(anon_df, aux_df):
       anon_id, matched_name
     containing ONLY uniquely matched records.
     """
-    raise NotImplementedError
+    ids = ["age", "zip3", "gender"]
+
+    merged = anon_df.merge(aux_df, on=ids, how="inner")
+
+    match_counts = merged.groupby("anon_id")["name"].transform("count")
+
+    unique_matches = merged[match_counts == 1][["anon_id", "name"]].rename(columns={"name": "matched_name"})
+
+    return unique_matches.reset_index(drop=True)
 
 
 def deanonymization_rate(matches_df, anon_df):
@@ -26,4 +34,7 @@ def deanonymization_rate(matches_df, anon_df):
     Compute the fraction of anonymized records
     that were uniquely re-identified.
     """
-    raise NotImplementedError
+    total_records = len(anon_df)
+    matched_records = len(matches_df)
+
+    return matched_records / total_records
